@@ -3,8 +3,16 @@ menuconfig LIBPATHLOAD
 	default n
 
 if LIBPATHLOAD
-config LIBPATHLOAD_MAIN_FUNCTION
-	bool "Provide main function"
-	default n
+
+choice
+	prompt "Function"
+
+	config LIBPATHLOAD_RECEIVER
+		bool "Receiver"
+
+	config LIBPATHLOAD_SENDER
+		bool "Sender"
+
+endchoice
 
 endif
