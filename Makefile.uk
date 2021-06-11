@@ -40,7 +40,7 @@ $(eval $(call addlib_s,libpathload,$(CONFIG_LIBPATHLOAD)))
 # Sources
 ################################################################################]
 LIBPATHLOAD_VERSION = a4503e8a0f59ff83e88b4dacbc1fec24274c77c2
-LIBPATHLOAD_URL = https://github.com/jean2/pathload
+LIBPATHLOAD_URL = https://github.com/jean2/pathload/archive/$(LIBPATHLOAD_VERSION).zip
 LIBPATHLOAD_SUBDIR = pathload-$(LIBPATHLOAD_VERSION)
 LIBPATHLOAD_PATCHDIR = $(LIBPATHLOAD_BASE)/patches
 $(eval $(call patch,libpathload,$(LIBPATHLOAD_PATCHDIR),$(LIBPATHLOAD_SUBDIR)))
