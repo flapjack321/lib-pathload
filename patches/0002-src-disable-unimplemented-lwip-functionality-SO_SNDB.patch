@@ -1,0 +1,163 @@
+From 4c940676f7bbfc5411f85acbea848f22f61a6f12 Mon Sep 17 00:00:00 2001
+From: Ethan Cotterell <ethancotterell@gmail.com>
+Date: Fri, 11 Jun 2021 14:32:07 +0100
+Subject: [PATCH 2/2] src: disable unimplemented lwip functionality `SO_SNDBUG`
+
+---
+ pathload_snd.c | 53 +++++++++++++++++++++++++-------------------------
+ 1 file changed, 26 insertions(+), 27 deletions(-)
+
+diff --git a/pathload_snd.c b/pathload_snd.c
+index 3ccfc94..03a4e78 100644
+--- a/pathload_snd.c
++++ b/pathload_snd.c
+@@ -17,13 +17,13 @@
+ */
+ 
+ /*-------------------------------------------------
+-   pathload : an end-to-end available bandwidth 
++   pathload : an end-to-end available bandwidth
+               estimation tool
+    Author   : Manish Jain (jain@cc.gatech.edu)
+               Constantinos Dovrolis (dovrolis@cc.gatech.edu)
+    Release  : Ver 1.3.2
+    Support  : This work was supported by the SciDAC
+-              program of the US department 
++              program of the US department
+ --------------------------------------------------*/
+ #define LOCAL
+ #include "pathload_gbls.h"
+@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
+ 
+   quiet=0;
+   while ((c = getopt(argc, argv, "ihHq")) != EOF)
+-    switch (c) 
++    switch (c)
+     {
+       case 'H':
+       case 'h':
+@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
+     latency[i]=tv2.tv_sec*1000000+tv2.tv_usec-tv1.tv_sec*1000000-tv1.tv_usec;
+   }
+   order_int(latency,ord_latency,30);
+-  gettimeofday_latency = ord_latency[15];  
++  gettimeofday_latency = ord_latency[15];
+ #ifdef DEBUG
+   printf("DEBUG :: gettimeofday_latency = %d\n",gettimeofday_latency);
+ #endif
+@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
+     exit(-1);
+   }
+   opt_len=1;
+-  if (setsockopt(sock_tcp, SOL_SOCKET, SO_REUSEADDR, (char*)&opt_len, 
++  if (setsockopt(sock_tcp, SOL_SOCKET, SO_REUSEADDR, (char*)&opt_len,
+         sizeof(opt_len)) < 0)
+   {
+     perror("setsockopt(SOL_SOCKET,SO_REUSEADDR):");
+@@ -122,31 +122,31 @@ int main(int argc, char* argv[])
+   snd_udp_addr.sin_family         = AF_INET;
+   snd_udp_addr.sin_addr.s_addr    = htonl(INADDR_ANY);
+   snd_udp_addr.sin_port           = htons(0);
+-  if (bind(sock_udp, (struct sockaddr*)&snd_udp_addr, 
++  if (bind(sock_udp, (struct sockaddr*)&snd_udp_addr,
+         sizeof(snd_udp_addr)) < 0)
+   {
+     perror("bind(sock_udp):");
+     exit(-1);
+   }
+   send_buff_sz = UDP_BUFFER_SZ;
+-  if (setsockopt(sock_udp, SOL_SOCKET, SO_SNDBUF, (char*)&send_buff_sz, 
+-        sizeof(send_buff_sz)) < 0)
+-  {
+-    send_buff_sz/=2;
+-    if (setsockopt(sock_udp, SOL_SOCKET, SO_SNDBUF, (char*)&send_buff_sz, 
+-        sizeof(send_buff_sz)) < 0)
+-    {
+-      perror("setsockopt(SOL_SOCKET,SO_SNDBUF):");
+-      exit(-1);
+-    }
+-  }
++  // if (setsockopt(sock_udp, SOL_SOCKET, SO_SNDBUF, (char*)&send_buff_sz,
++  //       sizeof(send_buff_sz)) < 0)
++  // {
++  //   send_buff_sz/=2;
++  //   if (setsockopt(sock_udp, SOL_SOCKET, SO_SNDBUF, (char*)&send_buff_sz,
++  //       sizeof(send_buff_sz)) < 0)
++  //   {
++  //     perror("setsockopt(SOL_SOCKET,SO_SNDBUF):");
++  //     exit(-1);
++  //   }
++  // }
+   do
+   {
+     if ( !quiet)
+       printf("\n\nWaiting for receiver to establish control stream => ");
+     fflush(stdout);
+-    /* 
+-      Wait until receiver attempts to connect, 
++    /*
++      Wait until receiver attempts to connect,
+       starting new measurement cycle
+     */
+     rcv_tcp_adrlen = sizeof(rcv_tcp_addr);
+@@ -155,10 +155,10 @@ int main(int argc, char* argv[])
+     {
+       perror("accept(sock_tcp):");
+       exit(-1);
+-    }  
++    }
+     if ( !quiet)
+       printf("OK\n");
+-    localtm = time(NULL); 
++    localtm = time(NULL);
+     gethostname(pkt_buf, 256);
+     host_rcv=gethostbyaddr((char*)&(rcv_tcp_addr.sin_addr), sizeof(rcv_tcp_addr.sin_addr), AF_INET);
+     if (host_rcv!=NULL)
+@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
+     rcv_udp_addr.sin_addr.s_addr    = rcv_tcp_addr.sin_addr.s_addr;
+     rcv_udp_addr.sin_port           = htons(UDPRCV_PORT);
+     /* Connect UDP socket */
+-    connect(sock_udp , (struct sockaddr *)&rcv_udp_addr , sizeof(rcv_udp_addr)); 
++    connect(sock_udp , (struct sockaddr *)&rcv_udp_addr , sizeof(rcv_udp_addr));
+     /* Make TCP socket non-blocking */
+     if (fcntl(ctr_strm, F_SETFL, O_NONBLOCK)<0)
+     {
+@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
+       exit(-1);
+     }
+     snd_max_pkt_sz = mss;
+-    if (snd_max_pkt_sz == 0 || snd_max_pkt_sz== 1448) 
++    if (snd_max_pkt_sz == 0 || snd_max_pkt_sz== 1448)
+       snd_max_pkt_sz = 1472;   /* Make it Ethernet sized MTU */
+     else
+       snd_max_pkt_sz = mss+12;
+@@ -213,7 +213,7 @@ int main(int argc, char* argv[])
+     if ( (cmd_train_len < 10) || (cmd_train_len > TRAIN_LEN) )
+       cmd_train_len = TRAIN_LEN;
+     if((ret_val=recv_ctr_mesg(ctr_buff)) == -1 )break;
+-    if ( (((ret_val & CTR_CODE) >> 31) == 1) && ((ret_val & 0x7fffffff) == SEND_TRAIN ) ) 
++    if ( (((ret_val & CTR_CODE) >> 31) == 1) && ((ret_val & 0x7fffffff) == SEND_TRAIN ) )
+     {
+       if ( !quiet)
+         printf("Estimating ADR to initialize rate adjustment algorithm => ");
+@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
+     while(!done)
+     {
+       if (( ret_val  = recv_ctr_mesg ( ctr_buff ) ) == -1 ) break ;
+-      if((((ret_val & CTR_CODE) >> 31) == 1) &&((ret_val&0x7fffffff) == TERMINATE)) 
++      if((((ret_val & CTR_CODE) >> 31) == 1) &&((ret_val&0x7fffffff) == TERMINATE))
+       {
+         if ( !quiet)
+           printf("Terminating current run.\n");
+@@ -256,7 +256,6 @@ int main(int argc, char* argv[])
+     }
+     close(ctr_strm);
+   }while (iterate);
+-  
++
+   return 0;
+ }
+-
+-- 
+2.25.1
+
