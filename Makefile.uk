@@ -59,10 +59,10 @@ CINCLUDES-y += -I$(LIBPATHLOAD_BASE)/include
 ################################################################################
 # Flags
 ################################################################################
-LIBPATHLOAD_FLAGS =
+LIBPATHLOAD_FLAGS = -DDEBUG
 
 # Suppress some warnings to make the build process look neater
-LIBPATHLOAD_FLAGS_SUPPRESS =
+LIBPATHLOAD_FLAGS_SUPPRESS = -Wformat
 
 LIBPATHLOAD_CFLAGS-y += $(LIBPATHLOAD_FLAGS)
 LIBPATHLOAD_CFLAGS-y += $(LIBPATHLOAD_FLAGS_SUPPRESS)
@@ -79,3 +79,12 @@ LIBPATHLOADSRCS-$(CONFIG_LIBPATHLOAD_MAIN_FUNCTION) += $(LIBPATHLOAD_BASE)/main.
 # Library sources
 ################################################################################
 # LIBPATHLOAD_SRCS-y += # Include source files here
+ifeq ($(CONFIG_LIBPATHLOAD_RECEIVER),y)
+LIBPATHLOAD_SRCS-y += $(LIBPATHLOAD_SRC)/pathload_rcv_func.c
+LIBPATHLOAD_SRCS-y += $(LIBPATHLOAD_SRC)/pathload_rcv.c
+endif
+
+ifeq ($(CONFIG_LIBPATHLOAD_SENDER),y)
+LIBPATHLOAD_SRCS-y += $(LIBPATHLOAD_SRC)/pathload_snd_func.c
+LIBPATHLOAD_SRCS-y += $(LIBPATHLOAD_SRC)/pathload_snd.c
+endif
